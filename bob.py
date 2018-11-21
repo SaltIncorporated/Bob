@@ -1,8 +1,15 @@
 #!.venv/bin/python3
 
+from filelock import FileLock, Timeout
+lock = FileLock("lock")
+try:
+    lock.acquire(timeout=10)
+except Timeout:
+    exit(0)
+
+
 from fbchat import Client
 from fbchat.models import *
-
 
 class Tell():
     def __init__(self, author, body):
