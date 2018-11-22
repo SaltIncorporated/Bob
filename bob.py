@@ -60,7 +60,7 @@ class Group():
         groups = client.fetchGroupInfo(id)
         u = {}
         for k in groups[str(id)].participants:
-            vs = client.fetchUserInfo(int(k))
+            vs = client.fetchUserInfo(k)
             for v in vs:
                 u[int(k)] = vs[v]
                 break
