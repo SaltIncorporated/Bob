@@ -35,10 +35,14 @@ class Bob(Client):
         self.tells[author_id] = []
         return tells
 
-    def parse_group_command(self, author_id, thread_id, text):
+    def parse_command(self, author_id, thread_id, text):
         if text[0] != '!':
             return None
-        cmd, body = text.split(' ', 1)
+        t = text.split(' ', 1)
+        if len(t) == 2:
+            cmd, body = t
+        else:
+            cmd, body = t[0], None
         cmd = cmd[1:]
 
         if cmd == 'tell':
@@ -63,6 +67,20 @@ class Bob(Client):
                 self.tells[reply_id] = []
             self.tells[reply_id].append(Tell(author, body))
 
+        elif cmd == 'stout':
+            return Message(text='Stout %s!' % body)
+
+        elif cmd == 'ketter':
+            return Message(text='https://youtu.be/lXhU9zacjzw')
+
+        elif cmd == 'help':
+            a = ['tell <name> <message...>',
+                 'stout <name>',
+                 'ketter',
+                 'help',
+                 'debug users']
+            return Message(text='\n'.join(a))
+
         elif cmd == 'debug':
             if body == 'users':
                 groups = self.fetchGroupInfo(thread_id)
@@ -72,6 +90,7 @@ class Bob(Client):
                 for id, user in self.fetchUserInfo(*users).items():
                     names.append(user.first_name.lower())
                 return Message(text=', '.join(names))
+
             else:
                 return Message(text='Usage: !debug users')
 
@@ -85,10 +104,7 @@ class Bob(Client):
             self.send(tell, thread_id=thread_id, thread_type=thread_type)
 
         cmd = message_object.text
-        if thread_type == ThreadType.GROUP:
-            reply = self.parse_group_command(author_id, thread_id, cmd)
-        else:
-            reply = None
+        reply = self.parse_command(author_id, thread_id, cmd)
         if reply:
             self.send(reply, thread_id=thread_id, thread_type=thread_type)
 
