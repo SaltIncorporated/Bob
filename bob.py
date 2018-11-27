@@ -15,7 +15,7 @@ from threading import Thread
 from datetime import datetime, timedelta
 import os
 from time import sleep
-
+import dateutil.parser
 
 
 def parse_time(time):
@@ -65,7 +65,8 @@ class Reminder():
         return [self.time.isoformat(), self.body]
 
     def deserialize(d):
-        return Reminder(datetime.fromisoformat(d[0]), d[1])
+        return Reminder(dateutil.parser.parse(d[0]), d[1])
+        #return Reminder(datetime.fromisoformat(d[0]), d[1])
 
 
 class Event(Reminder):
@@ -116,7 +117,8 @@ class Event(Reminder):
         return [self.time.isoformat(), self.body, self.uids]
 
     def deserialize(d):
-        e = Event(datetime.fromisoformat(d[0]), d[1])
+        e = Event(datetime.dateutil.parser.parse(d[0]), d[1])
+        #e = Event(datetime.fromisoformat(d[0]), d[1])
         e.uids = d[2]
         return e
 
