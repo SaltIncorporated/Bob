@@ -63,9 +63,7 @@ def cron(group):
 
 @bob.loadgroup
 def loadgroup(group):
-    reminders[group] = []
-    for id in group.liststore():
-        group.load(id)
+    reminders[group] = [Reminder.fromlist(group.load(i)) for i in group.liststore()]
 
 
 @bob.newgroup
