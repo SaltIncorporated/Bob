@@ -1,0 +1,3 @@
+- Create documentation
+- Use modules for each command.
+- Improve `!help` command

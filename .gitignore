@@ -1,3 +1,6 @@
+*.swp
+__pycache__
 groups/
 lock
 .venv/
+login.py
