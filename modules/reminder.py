@@ -38,7 +38,7 @@ class Reminder():
         return [self.date.isoformat(), self.body]
 
     def fromlist(d):
-        return Reminder(dateutil.parser.parse(d[0]), d[1])
+        return Reminder(-1, dateutil.parser.parse(d[0]), d[1])
 
 
 @bob.command('remind')

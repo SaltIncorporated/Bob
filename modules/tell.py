@@ -24,7 +24,6 @@ class Tell():
 
 @bob.message
 def onMessage(group, message):
-    print(tells)
     if group in tells:
         a = message.author
         t = tells[group]
@@ -56,7 +55,7 @@ def tell(group, msg):
             l = t[recipient_id]
         tell = (Tell(author, reply_to, body))
         l.append(tell)
-        group.store(str(recipient_id), l)
+        group.store(str(recipient_id), [tl.tolist() for tl in l])
         
 
 

@@ -109,12 +109,10 @@ class Command():
 
     def __call__(self, *args, **kwargs):
         global current_cmd
-        print('[==] Locking')
         with current_cmd_lock:
             current_cmd = self
             self._cmd(*args, **kwargs)
             current_cmd = None
-        print('[==] Unlocking')
 
     def __str__(self):
         return self.name + ':' + self.cmd.__name__
