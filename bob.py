@@ -115,7 +115,7 @@ class Command():
             current_cmd = None
 
     def __str__(self):
-        return self.name + ':' + self.cmd.__name__
+        return self.name + ':' + self._cmd.__name__
 
 
 class Bob(Client):
