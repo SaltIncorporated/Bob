@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import os
 from time import sleep
 import bob
-import uuid
 import dateutil.parser
 
 
@@ -39,7 +38,7 @@ class Event():
         return False
 
     def remove_user(self, uid):
-        if uid in self.user_ids:
+        if uid in self.uids:
             self.uids.remove(uid)
             return True
         return False
@@ -96,26 +95,26 @@ def event(group, msg):
             now  = datetime.now()
             date = datetime(year=now.year, month=now.month, day=now.day+parse_time(time).days, hour=int(hour), minute=int(minute))
             dirty_event = Event(date, body)
-            id = len(events[group])
-            while id in events[group]:
-                id += 1
-            events[group][id] = dirty_event
+            i = len(events[group])
+            while i in events[group]:
+                i += 1
+            events[group][i] = dirty_event
             msg = Message(text='Added event \'%s\'' % body)
         elif cmd == 'info':
             i = int(body)
             e = events[group][i]
-            msg = '%s (ID: %d)\nWhen: %s\nParticipants: %s' % (e.body, i, str(e.time), ', '.join([g.get_name(u) for u in e.uids]))
+            msg = '%s (ID: %d)\nWhen: %s\nParticipants: %s' % (e.body, i, str(e.date), ', '.join([group.get_name(u) for u in e.uids]))
             msg = Message(text=msg)
         elif cmd == 'join':
             i = int(body)
             e = events[group][i]
-            msg = ('Joined event \'%s\'' % e.body) if e.add_user(author_id) else ('Already joined \'%s\'' % e.body)
+            msg = ('Joined event \'%s\'' % e.body) if e.add_user(msg.author) else ('Already joined \'%s\'' % e.body)
             dirty_event = e
             msg = Message(text=msg)
         elif cmd == 'leave':
             i = int(body)
             e = events[group][i]
-            msg = ('Left event \'%s\'' % e.body) if e.remove_user(author_id) else ('Already left or not joined \'%s\'' % e.body)
+            msg = ('Left event \'%s\'' % e.body) if e.remove_user(msg.author) else ('Already left or not joined \'%s\'' % e.body)
             dirty_event = e
             msg = Message(text=msg)
         else:
@@ -131,7 +130,7 @@ def event(group, msg):
             msg = Message(text=usage_text)
 
     if dirty_event != None:
-        group.store(str(id), dirty_event.tolist())
+        group.store(str(i), dirty_event.tolist())
     if msg != None:
         group.send(msg)
 
@@ -145,7 +144,7 @@ def cron(group):
                 if e.has_begun():
                     msg = 'Event \'%s\' has started' % e.body
                 else:
-                    msg = 'Upcoming event: %s\n\nWhen: %s' % (e.body, str(e.time))
+                    msg = 'Upcoming event: %s\n\nWhen: %s' % (e.body, str(e.date))
                 group.send(Message(text=msg))
                 dellist.append(i)
                 group.delete(str(i))
@@ -155,7 +154,7 @@ def cron(group):
 
 @bob.loadgroup
 def loadgroup(group):
-    events[group] = { int(id): Event.fromlist(group.load(id)) for id in group.liststore() }
+    events[group] = { int(i): Event.fromlist(group.load(i)) for i in group.liststore() }
 
 
 @bob.newgroup

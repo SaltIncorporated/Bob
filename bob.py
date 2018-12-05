@@ -177,7 +177,8 @@ class Bob(Client):
 
         if cmd == 'help':
             if body == None:
-                msg = '\n'.join([c.name for c in commands])
+                print(commands)
+                msg = '\n'.join([c for c in commands])
             else:
                 msg = getdoc(commands.get(body, "Command '%s' does not exist" % body))
             return Message(text=msg)
