@@ -29,17 +29,31 @@ class Event():
         self.body = body
         self.date = date
         self.uids = []
+        self.cant_uids = []
         self.resetReminder()
 
     def add_user(self, uid):
         if uid not in self.uids:
+            if uid in self.cant_uids:
+                self.cant_uids.remove(uid)
             self.uids.append(uid)
+            return True
+        return False
+
+    def add_user_cant_go(self, uid):
+        if uid not in self.cant_uids:
+            if uid in self.uids:
+                self.uids.remove(uid)
+            self.cant_uids.append(uid)
             return True
         return False
 
     def remove_user(self, uid):
         if uid in self.uids:
             self.uids.remove(uid)
+            return True
+        if uid in self.cant_uids:
+            self.cant_uids.remove(uid)
             return True
         return False
 
@@ -69,11 +83,12 @@ class Event():
         return datetime.now() >= self.date
 
     def tolist(self):
-        return [self.date.isoformat(), self.body, self.uids]
+        return [self.date.isoformat(), self.body, self.uids, self.cant_uids]
 
     def fromlist(list):
         e = Event(dateutil.parser.parse(list[0]), list[1])
         e.uids = list[2]
+        e.cant_uids = list[3]
         return e
 
 
@@ -103,7 +118,10 @@ def event(group, msg):
         elif cmd == 'info':
             i = int(body)
             e = events[group][i]
-            msg = '%s (ID: %d)\nWhen: %s\nParticipants: %s' % (e.body, i, str(e.date), ', '.join([group.get_name(u) for u in e.uids]))
+            msg  = '%s (ID: %d)\n' % (e.body, i)
+            msg += 'When: %s\n' % str(e.date)
+            msg += 'Participants: %s\n' % ', '.join([group.get_name(u) for u in e.uids])
+            msg += "Can't go: %s" % ', '.join([group.get_name(u) for u in e.cant_uids])
             msg = Message(text=msg)
         elif cmd == 'join':
             i = int(body)
@@ -115,6 +133,15 @@ def event(group, msg):
             i = int(body)
             e = events[group][i]
             msg = ('Left event \'%s\'' % e.body) if e.remove_user(msg.author) else ('Already left or not joined \'%s\'' % e.body)
+            dirty_event = e
+            msg = Message(text=msg)
+        elif cmd == 'cant':
+            i = int(body)
+            e = events[group][i]
+            if e.add_user_cant_go(msg.author):
+                msg = "Added as 'can't go' for event '%s'" % e.body
+            else:
+                msg = "You are already added as unable to go for event '%s'" % e.body
             dirty_event = e
             msg = Message(text=msg)
         else:
