@@ -23,8 +23,7 @@ def parse_time(time):
 
 class Reminder():
 
-    def __init__(self, id, date, body):
-        self.id   = id
+    def __init__(self, date, body):
         self.date = date
         self.body = body
 
@@ -45,9 +44,11 @@ class Reminder():
 def remind(group, msg):
     rl = reminders[group]
     time, body = msg.text.split(' ', 1)
-    r = Reminder(len(rl), datetime.now() + parse_time(time), body)
-    rl.append(r)
-    group.store(str(r.id), r.tolist())
+    i = len(rl)
+    while i in rl:
+        i += 1
+    rl[i] = Reminder(datetime.now() + parse_time(time), body)
+    group.store(str(i), rl[i].tolist())
 
 
 @bob.cron(1)
@@ -55,15 +56,19 @@ def cron(group):
     if group in reminders:
         now = datetime.now()
         rl = reminders[group]
-        for r in rl:
+        to_del = []
+        for i,r in rl.items():
             if r.date < now:
                 group.send(Message(text=str(r)))
-                rl.remove(r)
+                to_del.append(i)
+                group.delete(str(i))
+        for i in to_del:
+            del rl[i]
 
 
 @bob.loadgroup
 def loadgroup(group):
-    reminders[group] = [Reminder.fromlist(group.load(i)) for i in group.liststore()]
+    reminders[group] = { int(i): Reminder.fromlist(group.load(i)) for i in group.liststore() }
 
 
 @bob.newgroup

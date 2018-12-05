@@ -109,15 +109,13 @@ class Command():
 
     def __call__(self, *args, **kwargs):
         global current_cmd
-        print('[==] Locking')
         with current_cmd_lock:
             current_cmd = self
             self._cmd(*args, **kwargs)
             current_cmd = None
-        print('[==] Unlocking')
 
     def __str__(self):
-        return self.name + ':' + self.cmd.__name__
+        return self.name + ':' + self._cmd.__name__
 
 
 class Bob(Client):
@@ -179,7 +177,8 @@ class Bob(Client):
 
         if cmd == 'help':
             if body == None:
-                msg = '\n'.join([c.name for c in commands])
+                print(commands)
+                msg = '\n'.join([c for c in commands])
             else:
                 msg = getdoc(commands.get(body, "Command '%s' does not exist" % body))
             return Message(text=msg)
