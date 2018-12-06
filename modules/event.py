@@ -61,11 +61,7 @@ class Event():
         now = datetime.now()
         delta = self.date - now
         if delta.days >= 7:
-            delta.days = delta.days // 7 * 7
-            delta.hours = self.date.hours
-            delta.minutes = self.date.minutes
-            delta.seconds = 0
-            delta.microseconds = 0
+            delta = timedelta(days = delta.days // 7 * 7)
         elif delta.days >= 1:
             delta = timedelta(days = 1)
         elif delta.seconds > 12 * 3600:
