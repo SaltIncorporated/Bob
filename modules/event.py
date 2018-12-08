@@ -30,7 +30,7 @@ class Event():
         self.date = date
         self.uids = []
         self.cant_uids = []
-        self.resetReminder()
+        self.reset_reminder()
 
     def add_user(self, uid):
         if uid not in self.uids:
@@ -57,7 +57,7 @@ class Event():
             return True
         return False
 
-    def resetReminder(self):
+    def reset_reminder(self):
         now = datetime.now()
         delta = self.date - now
         if delta.days >= 7:
@@ -166,11 +166,12 @@ def cron(group):
             if e.is_reminder_due():
                 if e.has_begun():
                     msg = 'Event \'%s\' has started' % e.body
+                    dellist.append(i)
+                    group.delete(str(i))
                 else:
                     msg = 'Upcoming event: %s\n\nWhen: %s' % (e.body, str(e.date))
+                    e.reset_reminder()
                 group.send(Message(text=msg))
-                dellist.append(i)
-                group.delete(str(i))
         for i in dellist:
             del events[group][i]
 
